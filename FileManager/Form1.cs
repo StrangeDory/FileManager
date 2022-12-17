@@ -152,6 +152,25 @@ namespace FileManager
             width = this.ClientSize.Width;
             userControlTable1.userControl_Resize(deltaHeight, deltaWidth);
         }
+
+        public struct POINT
+        {
+            public int X;
+            public int Y;
+        }
+
+        public POINT getCursorInWindow(POINT point)
+        {
+            point.X -= this.Left;
+            point.Y -= this.Top;
+            return point;
+        }
+
+        private void userControlTable1_deleteFile(object sender, EventArgs e)
+        {
+            makeTreeView();
+            //fullPathLabel.Text = sender.ToString();
+        }
     }
 
 

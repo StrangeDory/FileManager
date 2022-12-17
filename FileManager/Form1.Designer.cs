@@ -55,6 +55,7 @@ namespace FileManager
             this.userControlTable1.Size = new System.Drawing.Size(586, 430);
             this.userControlTable1.TabIndex = 0;
             this.userControlTable1.value_dgv = null;
+            this.userControlTable1.deleteFile += new System.EventHandler(this.userControlTable1_deleteFile);
             this.userControlTable1.chanName += new System.EventHandler(this.userControlTable1_chanName);
             // 
             // toolStrip1
