@@ -339,7 +339,8 @@ namespace FileManager
             SelectedRowIndex = dataGridView1.HitTest(p.X, p.Y).RowIndex;
         }
 
-        private string renameOldName = "";
+        private string OldName = "";
+        private bool isCopy = false;
 
         private void renameToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -347,7 +348,7 @@ namespace FileManager
             dataGridView1.CurrentCell = dataGridView1.Rows[SelectedRowIndex].Cells[0];
             dataGridView1.Focus();
             dataGridView1.BeginEdit(true);
-            renameOldName = dataGridView1.Rows[SelectedRowIndex].Cells[0].Value.ToString();
+            OldName = dataGridView1.Rows[SelectedRowIndex].Cells[0].Value.ToString();
             dataGridView1.Rows[SelectedRowIndex].Cells[0].Value = "";
         }
 
@@ -363,11 +364,11 @@ namespace FileManager
             {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
-                if (Directory.Exists(this.Text + "\\" + renameOldName))
+                if (Directory.Exists(this.Text + "\\" + OldName))
                 {
                     try
                     {
-                        Directory.Move(this.Text + "\\" + renameOldName, this.Text + "\\" + dataGridView1.Rows[SelectedRowIndex].Cells[0].Value.ToString());
+                        Directory.Move(this.Text + "\\" + OldName, this.Text + "\\" + dataGridView1.Rows[SelectedRowIndex].Cells[0].Value.ToString());
                     }
                     catch(Exception ex) { }
                 } 
@@ -375,7 +376,7 @@ namespace FileManager
                 {
                     try
                     {
-                        File.Move(this.Text + "\\" + renameOldName + dataGridView1.Rows[SelectedRowIndex].Cells[1].Value.ToString(), this.Text + "\\" + dataGridView1.Rows[SelectedRowIndex].Cells[0].Value.ToString() + dataGridView1.Rows[SelectedRowIndex].Cells[1].Value.ToString());
+                        File.Move(this.Text + "\\" + OldName + dataGridView1.Rows[SelectedRowIndex].Cells[1].Value.ToString(), this.Text + "\\" + dataGridView1.Rows[SelectedRowIndex].Cells[0].Value.ToString() + dataGridView1.Rows[SelectedRowIndex].Cells[1].Value.ToString());
                     }
                     catch (Exception ex) { }
                 }
@@ -383,6 +384,81 @@ namespace FileManager
                 SelectedRowIndex = -1;
                 loadForm(this.Text);
             }
+        }
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OldName = this.Text + "\\" + dataGridView1.Rows[SelectedRowIndex].Cells[0].Value.ToString();
+            if (!Directory.Exists(OldName))
+                OldName += dataGridView1.Rows[SelectedRowIndex].Cells[1].Value.ToString();
+            insertToolStripMenuItem.Enabled = true;
+            isCopy = true;
+        }
+
+        private static void CopyFilesRecursively(string sourcePath, string targetPath)
+        {
+            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+            }
+
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+            {
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+            }
+        }
+
+        private void insertToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (isCopy)
+            {
+                string fileName = OldName.Split("\\")[OldName.Split("\\").Length - 1];
+                if (File.Exists(OldName))
+                {
+                    try
+                    {
+                        File.Copy(OldName, this.Text + "\\" + fileName);
+                    }
+                    catch (Exception ex) { }
+                }
+                else
+                {
+                    Directory.CreateDirectory(this.Text + "\\" + fileName);
+                    CopyFilesRecursively(OldName, this.Text + "\\" + fileName);
+                }
+            }
+            else
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                string fileName = OldName.Split("\\")[OldName.Split("\\").Length - 1];
+                if (Directory.Exists(OldName))
+                {
+                    try
+                    {
+                        Directory.Move(OldName, this.Text + "\\" + fileName);
+                    }
+                    catch (Exception ex) { }
+                }
+                else
+                {
+                    try
+                    {
+                        File.Move(OldName, this.Text + "\\" + fileName);
+                    }
+                    catch (Exception ex) { }
+                }
+            }
+            insertToolStripMenuItem.Enabled = false;
+            loadForm(this.Text);
+        }
+
+        private void moveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OldName = this.Text + "\\" + dataGridView1.Rows[SelectedRowIndex].Cells[0].Value.ToString();
+            if (!Directory.Exists(OldName))
+                OldName += dataGridView1.Rows[SelectedRowIndex].Cells[1].Value.ToString();
+            insertToolStripMenuItem.Enabled = true;
         }
     }
 
