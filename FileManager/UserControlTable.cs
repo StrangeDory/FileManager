@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -204,6 +202,13 @@ namespace FileManager
 
         private void dataGridView1_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
+            if(dataGridView1[0, e.RowIndex].Value.Equals("[ ... ]"))
+            {
+                var text = this.Text.Split("\\");
+                this.Text = string.Join("\\", text.SkipLast(1).ToArray());
+                loadForm(this.Text);
+                return;
+            }
             if (e.RowIndex != -1)
             {
                 string path = this.Text + "\\" + dataGridView1[0, e.RowIndex].Value.ToString() + dataGridView1[1, e.RowIndex].Value.ToString();
@@ -404,9 +409,11 @@ namespace FileManager
 
         private void insertToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            string fileName = OldName.Split("\\")[OldName.Split("\\").Length - 1];
             if (isCopy)
             {
-                string fileName = OldName.Split("\\")[OldName.Split("\\").Length - 1];
                 if (File.Exists(OldName))
                 {
                     try
@@ -423,9 +430,7 @@ namespace FileManager
             }
             else
             {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                string fileName = OldName.Split("\\")[OldName.Split("\\").Length - 1];
+                
                 if (Directory.Exists(OldName))
                 {
                     try

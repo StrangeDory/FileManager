@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Threading;
+using System.Runtime.InteropServices;
 using System.Timers;
 using System.Windows.Forms;
-using System.Windows.Controls;
 
 namespace FileManager
 {
@@ -21,13 +19,6 @@ namespace FileManager
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //try
-            //{
-            //    Thread _lth = new Thread(makeTreeView);
-            //    _lth.IsBackground = true;
-            //    _lth.Start();
-            //}
-            //catch { }
             makeTreeView();
             fullPathLabel.Text = Button_Disk.DropDownItems[0].Text;
             userControlTable1.loadForm(fullPathLabel.Text);
@@ -48,7 +39,7 @@ namespace FileManager
             treeView1.Nodes.Clear();
             foreach (var myDrives in DriveInfo.GetDrives())
             {
-                if (myDrives.IsReady && !myDrives.Name.Equals("C:\\"))  // в диске С много файлов без доступа
+                if (myDrives.IsReady)  
                 {
                     Button_Disk.DropDownItems.Add(myDrives.Name);
                     LoadDirectory(myDrives.Name);
@@ -62,12 +53,13 @@ namespace FileManager
             TreeNode tds = treeView1.Nodes.Add(di.Name);
             tds.Tag = di.FullName;
             tds.StateImageIndex = 0;
-            LoadSubDirectories(Dir, tds);
+            LoadSubDirectories(0, Dir, tds);
         }
 
-        private void LoadSubDirectories(string dir, TreeNode td)
+        private void LoadSubDirectories(int level, string dir, TreeNode td)
         {
             string[] subdirectoryEntries = Directory.GetDirectories(dir);
+            level++;
             foreach (string subdirectory in subdirectoryEntries)
             {
                 try
@@ -76,7 +68,8 @@ namespace FileManager
                     TreeNode tds = td.Nodes.Add(di.Name);
                     tds.StateImageIndex = 0;
                     tds.Tag = di.FullName;
-                    LoadSubDirectories(subdirectory, tds);
+                    if (level < 4)
+                        LoadSubDirectories(level, subdirectory, tds);
                 }
                 catch (Exception) { }
             }
@@ -113,12 +106,6 @@ namespace FileManager
             userControlTable1.create_file(fullPathLabel.Text);
         }
 
-        private void userControlTable1_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            string path = fullPathLabel.Text + sender.ToString();
-            
-        }
-
         private void userControlTable1_chanName(object sender, EventArgs e)
         {
             try
@@ -142,12 +129,15 @@ namespace FileManager
 
         private void Form1_Resize(object sender, EventArgs e)
         {
-            int deltaHeight = this.ClientSize.Height - height;
-            int deltaWidth = this.ClientSize.Width - width;
-            treeView1.Height += deltaHeight;
-            height = this.ClientSize.Height;
-            width = this.ClientSize.Width;
-            userControlTable1.userControl_Resize(deltaHeight, deltaWidth);
+            if (!(this.WindowState == FormWindowState.Minimized))
+            {
+                int deltaHeight = this.ClientSize.Height - height;
+                int deltaWidth = this.ClientSize.Width - width;
+                treeView1.Height += deltaHeight;
+                height = this.ClientSize.Height;
+                width = this.ClientSize.Width;
+                userControlTable1.userControl_Resize(deltaHeight, deltaWidth);
+            }
         }
 
         public struct POINT
@@ -166,7 +156,6 @@ namespace FileManager
         private void userControlTable1_deleteFile(object sender, EventArgs e)
         {
             makeTreeView();
-            //fullPathLabel.Text = sender.ToString();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
