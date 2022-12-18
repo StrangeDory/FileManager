@@ -29,6 +29,8 @@ namespace FileManager
             //}
             //catch { }
             makeTreeView();
+            fullPathLabel.Text = Button_Disk.DropDownItems[0].Text;
+            userControlTable1.loadForm(fullPathLabel.Text);
             dateTimeTimer.Elapsed += new ElapsedEventHandler(Tm_Tick);
             dateTimeTimer.Interval = 1000;
             dateTimeTimer.Enabled = true;
@@ -89,11 +91,6 @@ namespace FileManager
             int countFiles = Directory.GetFiles(fullpath).Length;
             userControlTable1.loadForm(fullPathLabel.Text);
             amountFoldersFiles.Text = "Показано каталогов: " + countDir + " и файлов: " + countFiles;
-        }
-
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            
         }
 
         private void Button_Disk_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -170,6 +167,13 @@ namespace FileManager
         {
             makeTreeView();
             //fullPathLabel.Text = sender.ToString();
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            var dialogResult = MessageBox.Show("Are you sure you want to leave the program?", "Exit", MessageBoxButtons.YesNo);
+            if (dialogResult == DialogResult.No)
+                e.Cancel = true;
         }
     }
 

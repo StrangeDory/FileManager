@@ -32,16 +32,10 @@ namespace FileManager
         public event EventHandler updateForm;
         public event EventHandler chanName;
         public event Insetr insertFile;
-        List<string> rowNames = new List<string>();
 
         #endregion
 
         #region Load
-
-        private void mainUserControl_Load(object sender, EventArgs e)
-        {
-
-        }
 
         internal void loadForm(string name)
         {
@@ -459,6 +453,12 @@ namespace FileManager
             if (!Directory.Exists(OldName))
                 OldName += dataGridView1.Rows[SelectedRowIndex].Cells[1].Value.ToString();
             insertToolStripMenuItem.Enabled = true;
+        }
+
+        private void helpToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Help _hf = new Help();
+            _hf.ShowDialog();
         }
     }
 
