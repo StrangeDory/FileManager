@@ -24,7 +24,6 @@ namespace FileManager
         public string value_dgv { get; set; }
         int SelectedRowIndex = -1;
         Thread _lth;
-        public event EventHandler loedMUC2;
         public event EventHandler createFile;
         public event EventHandler deleteFile;
         public event EventHandler updateForm;
@@ -285,7 +284,14 @@ namespace FileManager
         private void SelectRow(int index)
         {
             if (SelectedRowIndex != -1)
+            {
                 changeColor(SelectedRowIndex);
+                if (isRename)
+                {
+                    dataGridView1.Rows[SelectedRowIndex].Cells[0].Value = OldName;
+                    isRename = false;
+                }
+            }
             SelectedRowIndex = index;
             if (SelectedRowIndex != -1)
                 dataGridView1.Rows[index].DefaultCellStyle.BackColor = Color.Aqua;
@@ -340,6 +346,7 @@ namespace FileManager
 
         private string OldName = "";
         private bool isCopy = false;
+        private bool isRename = false;
 
         private void renameToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -349,18 +356,24 @@ namespace FileManager
             dataGridView1.BeginEdit(true);
             OldName = dataGridView1.Rows[SelectedRowIndex].Cells[0].Value.ToString();
             dataGridView1.Rows[SelectedRowIndex].Cells[0].Value = "";
+            isRename = true;
         }
 
         private void dataGridView1_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if(char.IsLetter(e.KeyChar) || char.IsDigit(e.KeyChar))
+            if(isRename && (char.IsLetter(e.KeyChar) || char.IsDigit(e.KeyChar)))
                 dataGridView1.Rows[SelectedRowIndex].Cells[0].Value += e.KeyChar.ToString();
         }
 
         private void dataGridView1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter)
+            if (isRename && (e.KeyCode == Keys.Enter))
             {
+                if(dataGridView1.Rows[SelectedRowIndex].Cells[0].Value.Equals(""))
+                {
+                    dataGridView1.Rows[SelectedRowIndex].Cells[0].Value = OldName;
+                    return;
+                }
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 if (Directory.Exists(this.Text + "\\" + OldName))
@@ -382,6 +395,7 @@ namespace FileManager
                 dataGridView1.Rows[SelectedRowIndex].Cells[0].ReadOnly = true;
                 SelectedRowIndex = -1;
                 loadForm(this.Text);
+                isRename = false;
             }
         }
 
@@ -464,6 +478,19 @@ namespace FileManager
         {
             Help _hf = new Help();
             _hf.ShowDialog();
+        }
+
+        private void dataGridView1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (SelectedRowIndex != -1)
+            {
+                changeColor(SelectedRowIndex);
+                if (isRename)
+                {
+                    dataGridView1.Rows[SelectedRowIndex].Cells[0].Value = OldName;
+                    isRename = false;
+                }
+            }
         }
     }
 
